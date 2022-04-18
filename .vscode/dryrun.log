@@ -1,9 +1,0 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory '/home/kamo/github/VirtualMachine'
-g++ -c src/Input.cpp -o obj/Input.o
-g++ -c src/VirtualMachine.cpp -o obj/VirtualMachine.o
-g++ -c src/Output.cpp -o obj/Output.o
-g++ -c src/main.cpp -o obj/main.o
-g++  ./obj/Input.o  ./obj/VirtualMachine.o  ./obj/Output.o  ./obj/main.o -o VirtualMachine
-make: Leaving directory '/home/kamo/github/VirtualMachine'
- 
