@@ -1,7 +1,8 @@
-#include <string>
 #include "VirtualMachine.h"
-#include <iostream>
 
+#include <string>
+#include <iostream>
+ 
 int main(int argc, char* argv[])
 {
 	try

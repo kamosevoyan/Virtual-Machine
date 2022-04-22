@@ -1,5 +1,5 @@
 #include "Input.h"
-
+ 
 dtype KeyboardInput::get() &
 {
 	std::cout << "Input: ";

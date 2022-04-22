@@ -8,7 +8,7 @@ typedef unsigned char dtype;
 
 
 class Input
-{
+{ 
 public:
 	virtual dtype get() & = 0;
 private:

@@ -1,64 +1,126 @@
 #include "VirtualMachine.h"
 
+
 void ui_handler(int argc, char* argv[])
 {
 
 	VirtualMachine virtual_machine;
-
-	if (argc < 3)
+	std::ifstream test;
+	
+	if (argc < 4)
 	{
-		throw std::string("Error: missing inputs: Use following pattern: /VirtualMachine input_file_name \toutput type\n");
+		throw std::string(R"(Error: Misiing inputs. Use the following pattern.
+./VirtualMachine program input_mode output_mode
+)");
 	}
+	
 	if (std::string(argv[2]) == "-k")
 	{
-		if (argc != 4)
-		{
-			throw std::string("Error: to many inputs: Use following pattern: /VirtualMachine -k output mode\n");
-		}
+		virtual_machine.input = new KeyboardInput;
+		
 		if (std::string(argv[3]) == "-t")
 		{
 			virtual_machine.output = new TerminalOutput;
 		}
 		else
+		if (std::string(argv[3]) == "-f")
 		{
-			throw std::string("Error: unknown output mode. Use -t for terminal.\n");
+			if (argc < 5)
+			{
+						throw std::string(R"(Error: Misiing inputs. Use the following pattern.
+./VirtualMachine -k -f  output_file_name
+)");
+			}		 
+			test.open(argv[4]);
+			if (test.fail())
+			{
+				throw std::string("Error: incorrect output file name or directory.\n");
+			}
+			test.close();	
+
+			virtual_machine.output = new FileOutput(argv[4]);
 		}
-		virtual_machine.input = new KeyboardInput;
-	}
+	} 
 	else
 	if (std::string(argv[2]) == "-f")
 	{
-		std::cout << argc << "\n";
-
-		if (argc != 5)
-		{
-			throw std::string("Error: too many inputs: Use following pattern: /VirtualMachine input_file_name -f input_file_name output mode\n");
-		}
-
-		if (std::string(argv[4]) == "-t")
-		{
-			virtual_machine.output = new TerminalOutput;
-		}
-		else
-		{
-			throw std::string("Error: unknown output mode. Use -t for terminal.\n");
-		}		
-
-		std::ifstream temp;
-		temp.open(argv[3]);
-
-		if (temp.fail())
-		{
-			throw std::string("Error: Incorrect file name or directory\n");
-		}
-		temp.close();
-
-		virtual_machine.input = new FileInput(argv[3]);
+			if (std::string(argv[4]) == "-t")
+			{
+				if (argc < 5)
+				{
+							throw std::string(R"(Error: Misiing inputs. Use the following pattern.
+./VirtualMachine program -f input_file_name output_mode
+)");
+				}
+				
+				test.open(argv[3]);
+				if (test.fail())
+				{
+					throw std::string("Error: incorrect input file name or directory.\n");
+				}
+				
+				if (test.peek() == std::ifstream::traits_type::eof())
+				{
+					throw std::string("Error: empty input file\n");
+				}
+				
+				test.close();
+				
+				virtual_machine.input = new FileInput(argv[3]);
+				virtual_machine.output = new TerminalOutput;
+			}
+			else
+			if (std::string(argv[4]) == "-f")
+			{
+				if (argc < 6)
+				{
+							throw std::string(R"(Error: Misiing inputs. Use the following pattern.
+./VirtualMachine program -f input_file_name -f output_file_name
+)");					
+				}
+				
+				
+				test.open(argv[3]);
+				if (test.fail())
+				{
+					throw std::string("Error: incorrect input file name or directory.\n");
+				}
+									
+				if (test.peek() == std::ifstream::traits_type::eof())
+				{
+					throw std::string("Error: empty input file\n");
+				}
+				test.close();
+				
+				
+				test.open(argv[5]);
+				if (test.fail())
+				{
+					throw std::string("Error: incorrect output file name or directory.\n");
+				}
+				
+				test.close();
+				
+				virtual_machine.input = new FileInput(argv[3]);	
+				virtual_machine.output = new FileOutput(argv[5]);	
+			}
+			else
+			{
+				throw std::string(R"(Error: Misiing inputs. Use the following pattern.
+./VirtualMachine program -f input_file_name output_mode
+)");
+			}
 	}
 	else
-	{ 
-		throw std::string("Error: missing inputs: Use following pattern: /VirtualMachine input_file_name \toutput type\n");
+	{
+		throw std::string("Error: unknown input mode. Use -k or -f.\n");
 	}
+	
+	if ((virtual_machine.input == nullptr) || (virtual_machine.output == nullptr))
+	{
+		throw std::string("WTF");
+	}
+	
 	
 	std::ifstream program;
 	program.open(argv[1], std::ios::binary);
@@ -289,7 +351,7 @@ void VirtualMachine::decode() &
 				throw std::string("Error: Unknown opcode\n");					
 		}
 		module = 1;
-	}
+	} 
 	
 	this->execute(operation, operand1, operand2, destination, module);
 	
@@ -311,7 +373,7 @@ void VirtualMachine::execute(Operation operation, dtype operand1, dtype operand2
 			if (destination == this->ram_pointer)
 			{
 				temp = this->alu.compute(operation, operand1, operand2);
-				this->ram.write(this->ram_addres,temp);
+				this->ram.write(this->registers[this->ram_addres].get(), temp);
 			}
 			else
 			{
@@ -461,7 +523,7 @@ bool VirtualMachine::ControlUnit::compute(Operation operation, dtype operand1, d
 {
 	bool output = false;
 	
-	switch (operation)
+	switch (operation) 
 	{
 		case Operation::CND_EQUAL:
 

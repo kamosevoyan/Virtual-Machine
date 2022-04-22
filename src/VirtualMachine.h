@@ -10,12 +10,15 @@
 #include <thread>
 #include <iostream>
 #include <bitset>
+#include <algorithm>
+
 
 typedef unsigned char dtype;
 constexpr int REGISTERS = 12;
 const int RAM_SIZE = 256;
 
 void ui_handler(int, char*[]);
+void arg_parse(int, char*[]);
 
 class VirtualMachine final
 {	
@@ -23,11 +26,11 @@ class VirtualMachine final
 
 public:
 
-	const dtype HALT_OPCODE =     0b11111111;
-	const dtype ram_addres =  	  0b00000101;
-	const dtype program_counter = 0b00000110;
-	const dtype input_output = 	  0b00000111;
-	const dtype ram_pointer = 	  0b00001000;
+	const dtype HALT_OPCODE =   	0b11111111;
+	const dtype ram_addres =  	  			0b00000101;
+	const dtype program_counter = 		0b00000110;
+	const dtype input_output = 	  			0b00000111;
+	const dtype ram_pointer = 	  			0b00001000;
 
 private:
 
@@ -72,7 +75,7 @@ private:
 		void tick() &;
 
 	private:
-		size_t speed = 0;
+		size_t speed = 100000000;
 	};
 			
 	class Ram
@@ -98,7 +101,7 @@ private:
 	bool pc_to_update = true;
 
 	Input* input = nullptr;
-	Output* output = nullptr;
+	Output* output = nullptr; 
 				
 	void fetch() &;
 	void decode() &;
